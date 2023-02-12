@@ -1,3 +1,6 @@
--- Create databases
-CREATE DATABASE IF NOT EXISTS `database1` DEFAULT CHARACTER SET utf8 COLLATE utf8_general_ci;
-CREATE DATABASE IF NOT EXISTS `database2` DEFAULT CHARACTER SET utf8 COLLATE utf8_general_ci;
+-- Create databases postgreSQL
+DROP DATABASE IF EXISTS "database1";
+CREATE DATABASE "database1";
+
+DROP DATABASE IF EXISTS "database2";
+CREATE DATABASE "database2";

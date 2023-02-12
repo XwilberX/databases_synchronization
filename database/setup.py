@@ -1,5 +1,6 @@
 import asyncio
 import time
+import logging
 
 from sqlalchemy import select
 
@@ -33,10 +34,10 @@ async def insert_data():
 
     async with session_b() as session:
         async with session.begin():
-            for i in range(1, 2001):
+            for i in range(1, 4001):
                 user = User(name=f"User {i}", fullname=f"User {i}", password=f"Password {i}", seq=i)
                 session.add(user)
-    print(f"Tiempo de inserción: {round(time.time() - time_start, 2)} segundos")
+    logging.info(f"Tiempo de inserción: {round(time.time() - time_start, 2)} segundos")
 
 
 async def print_data():
@@ -51,12 +52,12 @@ async def print_data():
         async with session.begin():
             result = await session.execute(select(User))
             for row in result.scalars():
-                print('session2')
-                print(f"{row.id} - {row.name} - {row.fullname} - {row.password} - {row.seq}")
+                logging.error('session2')
+                logging.error(f"{row.id} - {row.name} - {row.fullname} - {row.password} - {row.seq}")
 
 
 async def main():
-    await create_table()
+    # await create_table()
     await insert_data()
     # await print_data()
 

@@ -39,31 +39,37 @@ async def check_data_db1(data):
 async def sync_data_db1(data):
     async with session_a() as session:
         async with session.begin():
-            start = time.time()
-            for row in data:
-                user = User(name=row.name, fullname=row.fullname, password=row.password, seq=row.seq)
-                session.add(user)
-            end = time.time()
-            logging.info(f"Tiempo de inserción: {round(end - start, 2)} segundos")
+            try:
+                start = time.time()
+                for row in data:
+                    user = User(name=row.name, fullname=row.fullname, password=row.password, seq=row.seq)
+                    session.add(user)
+                end = time.time()
+                logging.error(f"Tiempo de inserción: {round(end - start, 2)} segundos")
+            except Exception as e:
+                # rollback en caso de error
+                logging.error(f"Error al sincronizar datos: {e}")
+                session.rollback()
 
 
 async def main():
     seq = await get_last_seq_db1()
-    print(f"El SEQ mas reciente de la base de datos 1 es: {seq}")
+    logging.error(f"El SEQ mas reciente de la base de datos 1 es: {seq}")
     data = await get_data_db2(seq)
     if data:
         if await check_data_db1(data):
             await sync_data_db1(data)
         else:
-            print('La información ya se encuentra en la base de datos 1')
+            logging.error('La información ya se encuentra en la base de datos 1')
     else:
-        print('No hay información nueva para sincronizar')
+        logging.error('No hay información nueva para sincronizar')
 
 
 if __name__ == "__main__":
     from apscheduler.schedulers.asyncio import AsyncIOScheduler
     # crear cron job para ejecutar la funcion main cada hora
+    logging.error('Iniciando cron job')
     scheduler = AsyncIOScheduler()
-    scheduler.add_job(main, 'interval', seconds=3600)
+    scheduler.add_job(main, 'interval', seconds=15) # cambiar a 'interval', 'hours=1' para ejecutar cada hora
     scheduler.start()
     asyncio.get_event_loop().run_forever()
